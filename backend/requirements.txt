@@ -6,3 +6,5 @@ torch==2.3.0
 scikit-learn==1.4.2
 numpy==1.26.4
 pydantic==2.7.1
+huggingface_hub>=0.23.0
+hf_xet
