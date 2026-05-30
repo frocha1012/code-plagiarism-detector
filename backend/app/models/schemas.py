@@ -7,7 +7,7 @@ from pydantic import BaseModel
 class UploadResponse(BaseModel):
     """Returned after a successful file upload."""
     session_id: str
-    filenames: list[str]
+    uploaded_files: list[str]
     file_count: int
 
 

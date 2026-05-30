@@ -15,14 +15,14 @@ async def handle_upload(files: list[UploadFile]) -> dict:
         raise ValueError("Upload at least 2 files to compare.")
 
     session_id = new_session_id()
-    saved_filenames = []
+    uploaded_files = []
 
     for file in files:
         saved_path = await save_upload(file, session_id)
-        saved_filenames.append(saved_path.name)
+        uploaded_files.append(saved_path.name)
 
     return {
         "session_id": session_id,
-        "filenames": saved_filenames,
-        "file_count": len(saved_filenames),
+        "uploaded_files": uploaded_files,
+        "file_count": len(uploaded_files),
     }
