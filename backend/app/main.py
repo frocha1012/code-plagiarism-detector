@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import CORS_ORIGINS
 from app.routes.upload_routes import router as upload_router
-# from app.routes.similarity_routes import router as similarity_router  # Day 3
+from app.routes.similarity_routes import router as similarity_router
 
 app = FastAPI(
     title="Code Plagiarism Detector",
@@ -21,7 +21,7 @@ app.add_middleware(
 )
 
 app.include_router(upload_router, prefix="/api")
-# app.include_router(similarity_router, prefix="/api")  # Day 3
+app.include_router(similarity_router, prefix="/api")
 
 
 @app.get("/")

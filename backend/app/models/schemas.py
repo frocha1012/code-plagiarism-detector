@@ -13,10 +13,10 @@ class UploadResponse(BaseModel):
 
 class SimilarityPair(BaseModel):
     """A single comparison result between two files."""
-    file_a: str
-    file_b: str
-    score: float          # cosine similarity value between 0 and 1
-    level: str            # "high" | "medium" | "low"
+    file1: str
+    file2: str
+    score: float   # cosine similarity, 0.0 – 1.0
+    level: str     # "high" | "medium" | "low"
 
 
 class AnalysisResponse(BaseModel):

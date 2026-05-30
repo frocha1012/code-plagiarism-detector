@@ -21,9 +21,9 @@ CORS_ORIGINS = [
     "http://localhost:5173",
 ]
 
-# Similarity thresholds (used later)
-HIGH_SIMILARITY_THRESHOLD = 0.90
-MEDIUM_SIMILARITY_THRESHOLD = 0.75
+# Similarity thresholds
+HIGH_SIMILARITY_THRESHOLD = 0.85
+MEDIUM_SIMILARITY_THRESHOLD = 0.78
 
 # Create upload folder automatically
 UPLOAD_FOLDER.mkdir(parents=True, exist_ok=True)

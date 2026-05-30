@@ -1,26 +1,42 @@
-from fastapi import APIRouter
+# Similarity routes.
+# Accepts a session_id, loads the uploaded files, generates embeddings,
+# computes cosine similarity, and returns ranked pairs.
+
+from fastapi import APIRouter, HTTPException
+
+from app.models.schemas import AnalysisResponse
+from app.services.embedding_service import generate_embeddings
+from app.services.similarity_service import compute_similarity
+from app.utils.file_utils import list_session_files, read_file
 
 router = APIRouter(tags=["similarity"])
 
 
-@router.post("/analyze")
-async def analyze(session_id: str):
+@router.post("/analyze", response_model=AnalysisResponse)
+def analyze(session_id: str):
     """
-    Triggers embedding generation + cosine similarity for a set of uploaded files.
-    Day 2-3 task: wire embedding_service and similarity_service here.
+    Loads files for the given session_id, generates CodeBERT embeddings,
+    computes pairwise cosine similarity, and returns all pairs with
+    their similarity score and risk level.
     """
-    # TODO: load files for session_id
-    # TODO: call embedding_service.generate_embeddings()
-    # TODO: call similarity_service.compute_similarity()
-    # TODO: return ranked suspicious pairs
-    return {"session_id": session_id, "results": []}
+    files = list_session_files(session_id)
 
+    if not files:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Session '{session_id}' not found or contains no files.",
+        )
 
-@router.get("/results/{session_id}")
-async def get_results(session_id: str):
-    """
-    Returns cached similarity results for a session.
-    Day 4 task: serve results to the frontend results page.
-    """
-    # TODO: retrieve results from in-memory store or temp file
-    return {"session_id": session_id, "pairs": []}
+    if len(files) < 2:
+        raise HTTPException(
+            status_code=400,
+            detail="Session must contain at least 2 files to compare.",
+        )
+
+    filenames = [f.name for f in files]
+    snippets = [read_file(f) for f in files]
+
+    embeddings = generate_embeddings(snippets)
+    pairs = compute_similarity(filenames, embeddings, snippets)
+
+    return AnalysisResponse(session_id=session_id, pairs=pairs)
