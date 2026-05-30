@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.egg-info/
+
+# Uploads (runtime files, keep folder via .gitkeep)
+backend/uploads/*/
+
+# Node
+node_modules/
+dist/
+.env
+
+# OS
+.DS_Store
+Thumbs.db
