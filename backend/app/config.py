@@ -25,5 +25,8 @@ CORS_ORIGINS = [
 HIGH_SIMILARITY_THRESHOLD = 0.85
 MEDIUM_SIMILARITY_THRESHOLD = 0.78
 
+# Compare view
+LINE_MATCH_SIMILARITY_THRESHOLD = 0.75
+
 # Create upload folder automatically
 UPLOAD_FOLDER.mkdir(parents=True, exist_ok=True)

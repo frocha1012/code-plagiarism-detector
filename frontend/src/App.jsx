@@ -3,15 +3,18 @@ import UploadPage from "./pages/UploadPage";
 import ResultsPage from "./pages/ResultsPage";
 
 export default function App() {
-  const [results, setResults] = useState(null);
+  const [analysisResult, setAnalysisResult] = useState(null);
 
   return (
-    <div>
-      {!results ? (
-        <UploadPage onResults={setResults} />
+    <main className="app-shell">
+      {!analysisResult ? (
+        <UploadPage onResults={setAnalysisResult} />
       ) : (
-        <ResultsPage results={results} onReset={() => setResults(null)} />
+        <ResultsPage
+          results={analysisResult}
+          onReset={() => setAnalysisResult(null)}
+        />
       )}
-    </div>
+    </main>
   );
 }

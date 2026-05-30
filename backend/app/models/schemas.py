@@ -23,3 +23,25 @@ class AnalysisResponse(BaseModel):
     """Returned after similarity analysis completes."""
     session_id: str
     pairs: list[SimilarityPair]
+
+
+class FileContentResponse(BaseModel):
+    """Returned when loading a file for side-by-side comparison."""
+    filename: str
+    content: str
+
+
+class LineMatch(BaseModel):
+    """A similar line pair for the compare view."""
+    file1_line: int
+    file1_text: str
+    file2_line: int
+    file2_text: str
+    similarity: float
+
+
+class CompareResponse(BaseModel):
+    """Returned when comparing two files line-by-line."""
+    file1: str
+    file2: str
+    matches: list[LineMatch]

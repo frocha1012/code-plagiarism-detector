@@ -84,3 +84,24 @@ def list_session_files(session_id: str) -> list[Path]:
     if not session_dir.exists():
         return []
     return list(session_dir.iterdir())
+
+
+def get_session_file_path(session_id: str, filename: str) -> Path:
+    """
+    Safely resolves a file path inside a session folder.
+    Raises ValueError for traversal attempts or missing files.
+    """
+    safe_name = _safe_filename(filename)
+    if not safe_name or safe_name != filename:
+        raise ValueError("Invalid filename.")
+
+    session_dir = (UPLOAD_FOLDER / session_id).resolve()
+    file_path = (session_dir / safe_name).resolve()
+
+    if session_dir not in file_path.parents:
+        raise ValueError("Invalid file path.")
+
+    if not file_path.exists() or not file_path.is_file():
+        raise FileNotFoundError(f"File not found: {safe_name}")
+
+    return file_path
