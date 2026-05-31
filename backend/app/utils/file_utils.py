@@ -2,7 +2,9 @@
 # Handles session directories, file saving, and file reading.
 # Keeps file I/O logic out of routes and services.
 
+import io
 import uuid
+import zipfile
 from pathlib import Path
 from fastapi import UploadFile
 
@@ -84,6 +86,59 @@ def list_session_files(session_id: str) -> list[Path]:
     if not session_dir.exists():
         return []
     return list(session_dir.iterdir())
+
+
+def extract_zip(zip_bytes: bytes, session_id: str) -> list[str]:
+    """
+    Extracts allowed source files from a ZIP archive into the session folder.
+
+    Safety rules applied:
+    - Skips __MACOSX entries and hidden dot-files.
+    - Only keeps files whose extension is in ALLOWED_EXTENSIONS.
+    - Resolves every target path and verifies it stays inside session_dir
+      (zip-slip prevention).
+    - Skips any single entry larger than MAX_FILE_SIZE.
+
+    Returns a list of saved filenames.
+    Raises ValueError if fewer than 2 valid source files are found.
+    """
+    session_dir = get_session_dir(session_id)
+    saved: list[str] = []
+
+    with zipfile.ZipFile(io.BytesIO(zip_bytes)) as zf:
+        for entry in zf.infolist():
+            # Skip directories, __MACOSX metadata, and hidden files
+            if entry.is_dir():
+                continue
+            entry_name = Path(entry.filename)
+            if "__MACOSX" in entry_name.parts:
+                continue
+            stem = entry_name.name
+            if stem.startswith("."):
+                continue
+
+            if Path(stem).suffix.lower() not in ALLOWED_EXTENSIONS:
+                continue
+
+            if entry.file_size > MAX_FILE_SIZE:
+                continue
+
+            # Zip-slip: resolved destination must stay inside session_dir
+            destination = (session_dir / stem).resolve()
+            if session_dir.resolve() not in destination.parents:
+                continue
+
+            destination = _unique_destination(session_dir, stem)
+            destination.write_bytes(zf.read(entry.filename))
+            saved.append(destination.name)
+
+    if len(saved) < 2:
+        raise ValueError(
+            "ZIP archive must contain at least 2 supported source files "
+            f"({', '.join(sorted(ALLOWED_EXTENSIONS))})."
+        )
+
+    return saved
 
 
 def get_session_file_path(session_id: str, filename: str) -> Path:

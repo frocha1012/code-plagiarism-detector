@@ -25,11 +25,13 @@ export default function UploadPage({ onResults }) {
     return () => window.clearInterval(interval);
   }, [loading]);
 
+  const isZipUpload = files.length === 1 && files[0].name.endsWith(".zip");
+
   async function handleSubmit(e) {
     e.preventDefault();
 
-    if (files.length < 2) {
-      setError("Please upload at least 2 files to compare.");
+    if (!isZipUpload && files.length < 2) {
+      setError("Please upload at least 2 files, or a single ZIP archive.");
       return;
     }
 
@@ -105,12 +107,12 @@ export default function UploadPage({ onResults }) {
             &lt;/&gt;
           </span>
           <span className="file-drop-title">Drop or select code files</span>
-          <small>Accepted formats: .py, .java, .cs, .js</small>
+          <small>Upload multiple code files or a ZIP archive (.py, .java, .cs, .js)</small>
           <input
             className="file-input-hidden"
             type="file"
             multiple
-            accept=".py,.java,.cs,.js"
+            accept=".py,.java,.cs,.js,.zip"
             onChange={(e) => setFiles(Array.from(e.target.files))}
             disabled={loading}
           />
