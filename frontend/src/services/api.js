@@ -54,3 +54,30 @@ export async function getSimilarSections(sessionId, file1, file2) {
 
   return res.json();
 }
+
+export async function explainPair(sessionId, file1, file2, score, level) {
+  const res = await fetch(`${BASE_URL}/explain`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ session_id: sessionId, file1, file2, score, level }),
+  });
+
+  if (!res.ok) {
+    const error = await res.json().catch(() => null);
+    throw new Error(error?.detail || "Failed to get AI explanation");
+  }
+
+  return res.json(); // { explanation: "..." }
+}
+
+export async function exportPdfReport(sessionId) {
+  const encodedSessionId = encodeURIComponent(sessionId);
+  const res = await fetch(`${BASE_URL}/report/${encodedSessionId}`);
+
+  if (!res.ok) {
+    const error = await res.json().catch(() => null);
+    throw new Error(error?.detail || "Failed to export PDF report");
+  }
+
+  return res.blob();
+}
