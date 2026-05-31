@@ -39,7 +39,7 @@ This MVP must be **functional first, polished second**.
 
 * React
 * Vite
-* Tailwind CSS (optional)
+* Plain CSS (custom dark dashboard theme)
 
 ### Backend
 
@@ -56,10 +56,9 @@ This MVP must be **functional first, polished second**.
 * Cosine Similarity
 * scikit-learn
 
-### Optional (Only if time allows)
+### Optional (Implemented)
 
-* Ollama for explanations
-* FAISS for vector indexing
+* Ollama (llama3.1) — AI explanation per similarity pair
 
 ---
 
@@ -85,35 +84,37 @@ Similarity Results
 
 ### MVP Features (Required)
 
-* [ ] Upload multiple code files
+* [x] Upload multiple code files
+* [x] Upload a ZIP archive (extracted server-side with zip-slip prevention)
 
-* [ ] Support common programming languages
+* [x] Support common programming languages
 
   * Python
   * Java
   * C#
   * JavaScript
 
-* [ ] Generate embeddings from source code
+* [x] Generate embeddings from source code (CodeBERT, mean pooling)
 
-* [ ] Compare all uploaded files
+* [x] Compare all uploaded files (pairwise)
 
-* [ ] Calculate cosine similarity score
+* [x] Hybrid similarity score (0.7 × semantic cosine + 0.3 × lexical Jaccard)
 
-* [ ] Display suspicious file pairs
+* [x] Display suspicious file pairs with risk labels (high / medium / low)
 
-* [ ] Similarity matrix/table
+* [x] Similarity results table with score cards
 
-* [ ] Side-by-side file comparison
+* [x] Side-by-side line comparison (similar lines only, syntax highlighted)
 
 ---
 
 ### Optional Features (Stretch Goals)
 
-* [ ] Ollama similarity explanation
-* [ ] Highlight suspicious code regions
-* [ ] Export PDF report
-* [ ] Better UI styling
+* [x] Ollama AI explanation per similarity pair (llama3.1, graceful fallback)
+* [x] Export PDF report (ReportLab, session-based)
+* [x] Modern dark AI/SaaS dashboard UI
+* [x] Animated analysis loading screen with progress ring
+* [ ] Highlight suspicious code regions (AST-level — not planned)
 * [ ] Drag & drop upload
 
 ---
@@ -236,10 +237,11 @@ The project is considered successful if:
 
 ## Future Improvements
 
-* AST-based plagiarism detection
+* AST-based plagiarism detection (structural, not textual)
 * Cross-language similarity detection
-* More advanced code normalization
-* Teacher dashboard
-* Batch analysis
-* PDF report generation
+* More advanced code normalization (identifier abstraction)
+* Teacher dashboard with session history
+* Batch analysis across many sessions
 * Desktop app using Tauri
+* Docker deployment
+* FAISS vector index for large submission sets
