@@ -28,5 +28,9 @@ MEDIUM_SIMILARITY_THRESHOLD = 0.78
 # Compare view
 LINE_MATCH_SIMILARITY_THRESHOLD = 0.75
 
+# Ollama (optional AI explanations)
+OLLAMA_MODEL = "llama3.1"
+OLLAMA_URL = "http://localhost:11434/api/generate"
+
 # Create upload folder automatically
 UPLOAD_FOLDER.mkdir(parents=True, exist_ok=True)

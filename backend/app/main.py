@@ -5,7 +5,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import CORS_ORIGINS
+from app.routes.explain_routes import router as explain_router
 from app.routes.file_routes import router as file_router
+from app.routes.report_routes import router as report_router
 from app.routes.upload_routes import router as upload_router
 from app.routes.similarity_routes import router as similarity_router
 
@@ -24,6 +26,8 @@ app.add_middleware(
 app.include_router(upload_router, prefix="/api")
 app.include_router(similarity_router, prefix="/api")
 app.include_router(file_router, prefix="/api")
+app.include_router(report_router, prefix="/api")
+app.include_router(explain_router, prefix="/api")
 
 
 @app.get("/")
