@@ -1,35 +1,21 @@
-# Code Plagiarism Detector using Embeddings and Local LLM
-
-## Project Goal
-
-Build an application capable of detecting similarities between source code files to identify potential plagiarism in an academic context.
-
-The system will compare uploaded source code files using **AI embeddings specialized for code understanding** and calculate similarity scores between them.
-
-The application should detect:
-
-* Direct code copies
-* Variable/function renaming
-* Formatting modifications
-* Minor logical restructuring
-
-The system may optionally generate an explanation of the detected similarity using a **local LLM (Ollama)**.
+# Code Plagiarism Detector
+**Projeto 4 — University Course Project**
 
 ---
 
-## Project Scope (5-Day MVP)
+## Project Goal
 
-### Goal for MVP
+Build a web application capable of detecting similarities between source code files to identify potential plagiarism in an academic context.
 
-A working web application where the user can:
+The system compares uploaded source code files using **AI embeddings specialized for code understanding** and calculates similarity scores between all pairs. It can optionally generate a natural-language explanation of the detected similarity using a **local LLM (Ollama)**.
 
-1. Upload multiple code files
-2. Generate embeddings for each file
-3. Compare files using cosine similarity
-4. View suspicious similarity pairs
-5. Open a side-by-side comparison
+The application detects:
 
-This MVP must be **functional first, polished second**.
+* Direct code copies
+* Variable and function renaming
+* Formatting modifications
+* Minor logical restructuring
+* Structural similarity
 
 ---
 
@@ -37,8 +23,7 @@ This MVP must be **functional first, polished second**.
 
 ### Frontend
 
-* React
-* Vite
+* React + Vite
 * Plain CSS (custom dark dashboard theme)
 
 ### Backend
@@ -49,188 +34,123 @@ This MVP must be **functional first, polished second**.
 ### AI / Embeddings
 
 * HuggingFace Transformers
-* CodeBERT
+* CodeBERT (`microsoft/codebert-base`)
 
 ### Similarity
 
-* Cosine Similarity
+* Hybrid scoring: 0.7 × semantic (cosine) + 0.3 × lexical (Jaccard)
 * scikit-learn
 
-### Optional (Implemented)
+### AI Explanations
 
-* Ollama (llama3.1) — AI explanation per similarity pair
+* Ollama (llama3.1) — optional, graceful fallback if offline
 
 ---
 
 ## Architecture
 
 ```text
-Frontend (React)
+Frontend (React + Vite)
         ↓
 FastAPI Backend
         ↓
-Code Processing Layer
+File Upload & Session Management
         ↓
-CodeBERT Embeddings
+CodeBERT Embedding Generation
         ↓
-Cosine Similarity Analysis
+Hybrid Similarity Scoring
         ↓
-Similarity Results
+Results + Line Comparison + AI Explanation
 ```
 
 ---
 
 ## Features
 
-### MVP Features (Required)
+### Core
 
-* [x] Upload multiple code files
-* [x] Upload a ZIP archive (extracted server-side with zip-slip prevention)
+* [x] Upload multiple code files or a single ZIP archive
+* [x] Support for Python, Java, C#, JavaScript
+* [x] CodeBERT embeddings (mean pooling, 768-dimensional)
+* [x] Hybrid similarity scoring (semantic + lexical)
+* [x] Pairwise comparison across all uploaded files
+* [x] Risk level classification: High / Medium / Low
+* [x] Similarity results dashboard with score cards
+* [x] Similar Code Lines viewer (syntax highlighted, grouped blocks)
+* [x] Ollama AI explanation per pair (4 structured bullets, offline fallback)
+* [x] PDF report export (session-based, ReportLab)
+* [x] Animated analysis screen with progress ring
 
-* [x] Support common programming languages
+### Security
 
-  * Python
-  * Java
-  * C#
-  * JavaScript
-
-* [x] Generate embeddings from source code (CodeBERT, mean pooling)
-
-* [x] Compare all uploaded files (pairwise)
-
-* [x] Hybrid similarity score (0.7 × semantic cosine + 0.3 × lexical Jaccard)
-
-* [x] Display suspicious file pairs with risk labels (high / medium / low)
-
-* [x] Similarity results table with score cards
-
-* [x] Side-by-side line comparison (similar lines only, syntax highlighted)
+* [x] File extension validation
+* [x] Max file size enforcement
+* [x] ZIP extraction path traversal prevention (zip-slip)
+* [x] Session-scoped file access only
 
 ---
 
-### Optional Features (Stretch Goals)
+## Similarity Thresholds
 
-* [x] Ollama AI explanation per similarity pair (llama3.1, graceful fallback)
-* [x] Export PDF report (ReportLab, session-based)
-* [x] Modern dark AI/SaaS dashboard UI
-* [x] Animated analysis loading screen with progress ring
-* [ ] Highlight suspicious code regions (AST-level — not planned)
-* [ ] Drag & drop upload
+| Score | Risk Level | Interpretation |
+|---|---|---|
+| ≥ 85% | High | Strong suspicion — likely renaming or direct copy |
+| 78–84% | Medium | Structural overlap — manual review recommended |
+| < 78% | Low | Limited similarity — likely unrelated |
 
----
-
-## Similarity Rules
-
-Suggested thresholds:
-
-* **90%+** → High plagiarism suspicion
-* **75–89%** → Medium suspicion
-* **Below 75%** → Low suspicion
-
-These thresholds may be adjusted after testing.
+Thresholds are configurable in `backend/app/config.py`.
 
 ---
 
 ## Folder Structure
 
 ```text
-project-root/
-│
+P4/
 ├── backend/
 │   ├── app/
-│   │   ├── routes/
-│   │   ├── services/
-│   │   ├── models/
-│   │   ├── utils/
+│   │   ├── routes/         # upload, similarity, compare, report, explain
+│   │   ├── services/       # upload, embedding, similarity, report, explain
+│   │   ├── utils/          # file_utils, compare_utils
+│   │   ├── models/         # Pydantic schemas
+│   │   ├── config.py
 │   │   └── main.py
-│   │
-│   ├── uploads/
+│   ├── tests/
+│   │   └── sample_files/   # test fixtures (small + big_batch)
+│   ├── uploads/            # session folders (git-ignored)
 │   └── requirements.txt
 │
 ├── frontend/
 │   ├── src/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   ├── services/
+│   │   ├── components/     # SimilarityTable, CompareView, AnalysisLoader
+│   │   ├── pages/          # UploadPage, ResultsPage
+│   │   ├── services/       # api.js
 │   │   └── App.jsx
 │
-├── docs/
-│
+├── development_status/     # audit and progress notes
 ├── README.md
 └── TODO.md
 ```
 
 ---
 
-## Development Plan (5 Days)
-
-### Day 1
-
-* Setup project structure
-* Setup FastAPI backend
-* Setup React frontend
-* Implement file upload
-
-### Day 2
-
-* Integrate CodeBERT
-* Generate embeddings from uploaded code
-* Test embedding generation
-
-### Day 3
-
-* Implement cosine similarity
-* Compare uploaded files
-* Return similarity results
-
-### Day 4
-
-* Create frontend results view
-* Build similarity table
-* Build side-by-side comparison view
-
-### Day 5
-
-* Bug fixing
-* UI improvements
-* Optional Ollama integration
-* Prepare demo screenshots
-
----
-
 ## Development Rules
 
-### Important Project Rules
-
-* Keep backend modular
-* Prefer simple implementations first
-* Do not overengineer
-* Prioritize a working MVP
-* Avoid unnecessary complexity
-* Build features incrementally
-* Test after every major feature
-
-### AI Assistant Instructions (Cursor Context)
-
-When generating code:
-
-* Use clean architecture
-* Keep components modular
-* Avoid unnecessary abstractions
-* Explain important implementation decisions
+* Keep backend modular — routes stay thin, logic lives in services
+* No unnecessary abstractions
+* Avoid overengineering
+* Build incrementally, test after every major feature
 * Prefer readability over optimization
-* Focus on MVP completion within 5 days
 
 ---
 
 ## Success Criteria
 
-The project is considered successful if:
-
-* A user can upload multiple source code files
-* The system generates similarity scores
-* Suspicious pairs are identified
-* The UI displays comparison results clearly
+* A user can upload multiple source code files or a ZIP archive
+* The system generates similarity scores for all pairs
+* Suspicious pairs are identified and labeled with a risk level
+* Similar code lines are shown with syntax highlighting
+* An AI explanation can be requested per pair
+* A PDF report can be exported
 * The application is demo-ready
 
 ---
