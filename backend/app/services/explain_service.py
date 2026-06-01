@@ -1,9 +1,8 @@
 """
-Optional AI explanation via local Ollama.
+Optional AI features via local Ollama.
 
-Calls the Ollama HTTP API to generate a short natural-language explanation
-of why two files may be similar. If Ollama is not running or returns an
-error, a static fallback is returned so the rest of the app is unaffected.
+Provides per-pair explanations and a session-level summary.
+All functions fall back gracefully if Ollama is unavailable.
 """
 
 import json
@@ -14,14 +13,47 @@ from app.config import OLLAMA_MODEL, OLLAMA_URL
 
 _TIMEOUT_SECONDS = 20
 
-_FALLBACK = (
+_FALLBACK_EXPLAIN = (
     "Automated AI explanation is unavailable (Ollama is not running). "
     "Review the similarity score and the matched lines manually to assess "
     "whether the overlap is coincidental or indicates copied work."
 )
 
 
-def _build_prompt(file1: str, file2: str, score: float, level: str) -> str:
+# ── Shared Ollama caller ──────────────────────────────────────────────────────
+
+def _call_ollama(prompt: str, fallback: str) -> str:
+    """Sends a prompt to the local Ollama API and returns the response text.
+    Returns fallback if Ollama is unavailable or returns an empty response."""
+    payload = json.dumps({
+        "model": OLLAMA_MODEL,
+        "prompt": prompt,
+        "stream": False,
+    }).encode()
+
+    req = urllib.request.Request(
+        OLLAMA_URL,
+        data=payload,
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+
+    try:
+        with urllib.request.urlopen(req, timeout=_TIMEOUT_SECONDS) as response:
+            body = json.loads(response.read().decode())
+            text = body.get("response", "").strip()
+            return text if text else fallback
+
+    except (urllib.error.URLError, TimeoutError, OSError):
+        return fallback
+
+    except Exception:  # noqa: BLE001 — never crash the API over an optional feature
+        return fallback
+
+
+# ── Per-pair explanation ──────────────────────────────────────────────────────
+
+def _build_explain_prompt(file1: str, file2: str, score: float, level: str) -> str:
     pct = f"{score * 100:.1f}%"
 
     if score >= 0.95:
@@ -48,34 +80,92 @@ def _build_prompt(file1: str, file2: str, score: float, level: str) -> str:
 
 
 def get_explanation(file1: str, file2: str, score: float, level: str) -> str:
-    """
-    Returns a short AI explanation string.
-    Falls back to a static message if Ollama is unavailable.
-    """
-    prompt = _build_prompt(file1, file2, score, level)
-    payload = json.dumps({
-        "model": OLLAMA_MODEL,
-        "prompt": prompt,
-        "stream": False,
-    }).encode()
+    """Returns a 4-bullet AI explanation for a similarity pair."""
+    prompt = _build_explain_prompt(file1, file2, score, level)
+    return _call_ollama(prompt, _FALLBACK_EXPLAIN)
 
-    req = urllib.request.Request(
-        OLLAMA_URL,
-        data=payload,
-        headers={"Content-Type": "application/json"},
-        method="POST",
+
+# ── Session-level summary ─────────────────────────────────────────────────────
+
+def _build_summary_prompt(pairs: list[dict]) -> str:
+    total_files = len({f for p in pairs for f in (p["file1"], p["file2"])})
+    total_pairs = len(pairs)
+    high_pairs = [p for p in pairs if p["level"] == "high"]
+    medium_pairs = [p for p in pairs if p["level"] == "medium"]
+    highest = max(pairs, key=lambda p: p["score"]) if pairs else None
+    high_count = len(high_pairs)
+    medium_count = len(medium_pairs)
+
+    top_pair_line = ""
+    if highest:
+        pct = f"{highest['score'] * 100:.1f}%"
+        top_pair_line = (
+            f"  Most suspicious pair: '{highest['file1']}' vs '{highest['file2']}' "
+            f"at {pct} ({highest['level']} risk).\n"
+        )
+
+    high_list = "\n".join(
+        f"  - '{p['file1']}' vs '{p['file2']}': {p['score'] * 100:.1f}%"
+        for p in high_pairs
     )
 
-    try:
-        with urllib.request.urlopen(req, timeout=_TIMEOUT_SECONDS) as response:
-            body = json.loads(response.read().decode())
-            text = body.get("response", "").strip()
-            if text:
-                return text
-            return _FALLBACK
+    return (
+        f"You are a university lecturer reviewing a plagiarism detection report.\n\n"
+        f"Session statistics:\n"
+        f"  Files analyzed: {total_files}\n"
+        f"  Total pairs compared: {total_pairs}\n"
+        f"  High-risk pairs: {high_count}\n"
+        f"  Medium-risk pairs: {medium_count}\n"
+        f"{top_pair_line}"
+        + (f"\nHigh-risk pairs:\n{high_list}\n" if high_list else "")
+        + f"\nWrite a concise report in 2–3 short paragraphs covering:\n"
+        f"  1. An overall assessment of the session (how many files, how many suspicious pairs).\n"
+        f"  2. The most concerning findings and what patterns they suggest.\n"
+        f"  3. A recommendation on which pairs warrant manual review and why.\n\n"
+        f"End with this exact sentence on its own line:\n"
+        f"'Similarity scores are indicators and do not constitute proof of plagiarism.'\n\n"
+        f"Be professional, specific, and concise. Reference actual filenames and scores."
+    )
 
-    except (urllib.error.URLError, TimeoutError, OSError):
-        return _FALLBACK
 
-    except Exception:  # noqa: BLE001 — never crash the API over an optional feature
-        return _FALLBACK
+def _build_fallback_summary(pairs: list[dict]) -> str:
+    total_files = len({f for p in pairs for f in (p["file1"], p["file2"])})
+    total_pairs = len(pairs)
+    high_count = sum(1 for p in pairs if p["level"] == "high")
+    medium_count = sum(1 for p in pairs if p["level"] == "medium")
+    highest = max(pairs, key=lambda p: p["score"]) if pairs else None
+
+    lines = [
+        f"This session analyzed {total_files} files across {total_pairs} pairwise comparisons. "
+        f"{high_count} pair(s) were flagged as high risk and {medium_count} as medium risk.",
+    ]
+
+    if highest:
+        pct = f"{highest['score'] * 100:.1f}%"
+        lines.append(
+            f"The most suspicious pair was '{highest['file1']}' vs '{highest['file2']}' "
+            f"with a similarity score of {pct}. "
+            f"This pair should be prioritized for manual review."
+        )
+
+    if high_count > 0:
+        lines.append(
+            "All high-risk pairs are recommended for manual review by a lecturer "
+            "before any academic decision is made."
+        )
+
+    lines.append(
+        "Similarity scores are indicators and do not constitute proof of plagiarism."
+    )
+
+    return " ".join(lines)
+
+
+def get_summary(pairs: list[dict]) -> str:
+    """Returns an AI-generated session summary, or a data-driven fallback."""
+    if not pairs:
+        return "No similarity pairs were provided. Upload and analyze files to generate a summary."
+
+    fallback = _build_fallback_summary(pairs)
+    prompt = _build_summary_prompt(pairs)
+    return _call_ollama(prompt, fallback)

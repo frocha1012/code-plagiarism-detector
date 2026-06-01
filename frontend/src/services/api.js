@@ -55,6 +55,21 @@ export async function getSimilarSections(sessionId, file1, file2) {
   return res.json();
 }
 
+export async function generateSummary(sessionId, pairs) {
+  const res = await fetch(`${BASE_URL}/summary`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ session_id: sessionId, pairs }),
+  });
+
+  if (!res.ok) {
+    const error = await res.json().catch(() => null);
+    throw new Error(error?.detail || "Failed to generate summary");
+  }
+
+  return res.json(); // { summary: "..." }
+}
+
 export async function explainPair(sessionId, file1, file2, score, level) {
   const res = await fetch(`${BASE_URL}/explain`, {
     method: "POST",

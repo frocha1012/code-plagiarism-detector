@@ -1,7 +1,7 @@
 import { useState } from "react";
 import CompareView from "../components/CompareView";
 import SimilarityTable from "../components/SimilarityTable";
-import { explainPair, exportPdfReport, getSimilarSections } from "../services/api";
+import { explainPair, exportPdfReport, generateSummary, getSimilarSections } from "../services/api";
 
 const techStack = [
   "CodeBERT",
@@ -25,6 +25,9 @@ export default function ResultsPage({ results, onReset }) {
   const [loadingExplain, setLoadingExplain] = useState(null); // pairKey | null
   const [exportingReport, setExportingReport] = useState(false);
   const [reportError, setReportError] = useState(null);
+  const [summary, setSummary] = useState(null);
+  const [loadingSummary, setLoadingSummary] = useState(false);
+  const [summaryError, setSummaryError] = useState(null);
 
   async function handleCompare(pair) {
     const pairKey = `${pair.file1}-${pair.file2}`;
@@ -67,6 +70,21 @@ export default function ResultsPage({ results, onReset }) {
       }));
     } finally {
       setLoadingExplain(null);
+    }
+  }
+
+  async function handleGenerateSummary() {
+    if (summary) return;
+    setLoadingSummary(true);
+    setSummaryError(null);
+
+    try {
+      const data = await generateSummary(results.session_id, pairs);
+      setSummary(data.summary);
+    } catch (err) {
+      setSummaryError(err.message || "Could not generate summary.");
+    } finally {
+      setLoadingSummary(false);
     }
   }
 
@@ -137,6 +155,38 @@ export default function ResultsPage({ results, onReset }) {
           <strong>{(highestScore * 100).toFixed(1)}%</strong>
         </div>
       </div>
+
+      {!summary && (
+        <div className="ai-summary-trigger">
+          <button
+            className="explain-button"
+            type="button"
+            onClick={handleGenerateSummary}
+            disabled={loadingSummary || pairs.length === 0}
+          >
+            {loadingSummary ? (
+              <>
+                <span className="explain-spinner" aria-hidden="true" />
+                Generating summary…
+              </>
+            ) : (
+              <>✦ Generate AI Summary</>
+            )}
+          </button>
+          {summaryError && <p className="error-message">{summaryError}</p>}
+        </div>
+      )}
+
+      {summary && (
+        <div className="ai-summary-card">
+          <p className="ai-summary-label">✦ AI Analysis Summary</p>
+          {summary.split("\n").filter(Boolean).map((para, i) => (
+            <p key={i} className={para.startsWith("Similarity scores") ? "ai-summary-disclaimer" : "ai-summary-para"}>
+              {para}
+            </p>
+          ))}
+        </div>
+      )}
 
       {pairs.length > 0 ? (
         <SimilarityTable
