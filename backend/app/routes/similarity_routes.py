@@ -6,6 +6,7 @@ from fastapi import APIRouter, HTTPException
 
 from app.models.schemas import AnalysisResponse
 from app.services.embedding_service import generate_embeddings
+from app.services.history_service import save_analysis
 from app.services.similarity_service import compute_similarity
 from app.utils.file_utils import list_session_files, read_file
 
@@ -38,5 +39,8 @@ def analyze(session_id: str):
 
     embeddings = generate_embeddings(snippets)
     pairs = compute_similarity(filenames, embeddings, snippets)
+
+    # Persist metadata + results so this analysis appears in History.
+    save_analysis(session_id, pairs)
 
     return AnalysisResponse(session_id=session_id, pairs=pairs)

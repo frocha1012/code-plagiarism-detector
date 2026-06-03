@@ -45,3 +45,12 @@ class CompareResponse(BaseModel):
     file1: str
     file2: str
     matches: list[LineMatch]
+
+
+class HistoryItem(BaseModel):
+    """Metadata for a single saved analysis, used by the History page."""
+    session_id: str
+    created_at: str
+    file_count: int
+    highest_score: float
+    high_risk_pairs: int

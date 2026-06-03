@@ -85,6 +85,43 @@ export async function explainPair(sessionId, file1, file2, score, level) {
   return res.json(); // { explanation: "..." }
 }
 
+export async function getHistory() {
+  const res = await fetch(`${BASE_URL}/history`);
+
+  if (!res.ok) {
+    const error = await res.json().catch(() => null);
+    throw new Error(error?.detail || "Failed to load history");
+  }
+
+  return res.json(); // [{ session_id, created_at, file_count, highest_score, high_risk_pairs }]
+}
+
+export async function getHistorySession(sessionId) {
+  const encodedSessionId = encodeURIComponent(sessionId);
+  const res = await fetch(`${BASE_URL}/history/${encodedSessionId}`);
+
+  if (!res.ok) {
+    const error = await res.json().catch(() => null);
+    throw new Error(error?.detail || "Failed to load saved analysis");
+  }
+
+  return res.json(); // { session_id, pairs }
+}
+
+export async function deleteHistorySession(sessionId) {
+  const encodedSessionId = encodeURIComponent(sessionId);
+  const res = await fetch(`${BASE_URL}/history/${encodedSessionId}`, {
+    method: "DELETE",
+  });
+
+  if (!res.ok) {
+    const error = await res.json().catch(() => null);
+    throw new Error(error?.detail || "Failed to delete session");
+  }
+
+  return res.json();
+}
+
 export async function exportPdfReport(sessionId) {
   const encodedSessionId = encodeURIComponent(sessionId);
   const res = await fetch(`${BASE_URL}/report/${encodedSessionId}`);

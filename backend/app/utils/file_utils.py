@@ -10,6 +10,12 @@ from fastapi import UploadFile
 
 from app.config import UPLOAD_FOLDER, ALLOWED_EXTENSIONS, MAX_FILE_SIZE
 
+# Reserved metadata files written alongside source files in a session folder.
+# These are never treated as uploaded source code.
+METADATA_FILE = "metadata.json"
+ANALYSIS_FILE = "analysis.json"
+RESERVED_FILES = {METADATA_FILE, ANALYSIS_FILE}
+
 
 def new_session_id() -> str:
     """Generates a unique ID for each upload batch."""
@@ -81,11 +87,19 @@ def read_file(path: Path) -> str:
 
 
 def list_session_files(session_id: str) -> list[Path]:
-    """Returns all file paths saved under a session directory."""
+    """Returns all uploaded source file paths under a session directory.
+
+    Reserved metadata files (metadata.json, analysis.json) are excluded so
+    they are never treated as source code or counted as uploads.
+    """
     session_dir = UPLOAD_FOLDER / session_id
     if not session_dir.exists():
         return []
-    return list(session_dir.iterdir())
+    return [
+        path
+        for path in session_dir.iterdir()
+        if path.is_file() and path.name not in RESERVED_FILES
+    ]
 
 
 def extract_zip(zip_bytes: bytes, session_id: str) -> list[str]:
