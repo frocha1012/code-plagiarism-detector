@@ -14,7 +14,8 @@ from app.config import UPLOAD_FOLDER, ALLOWED_EXTENSIONS, MAX_FILE_SIZE
 # These are never treated as uploaded source code.
 METADATA_FILE = "metadata.json"
 ANALYSIS_FILE = "analysis.json"
-RESERVED_FILES = {METADATA_FILE, ANALYSIS_FILE}
+SOURCE_FILE = "source.json"  # download info for GitHub-sourced sessions
+RESERVED_FILES = {METADATA_FILE, ANALYSIS_FILE, SOURCE_FILE}
 
 
 def new_session_id() -> str:
@@ -87,17 +88,21 @@ def read_file(path: Path) -> str:
 
 
 def list_session_files(session_id: str) -> list[Path]:
-    """Returns all uploaded source file paths under a session directory.
+    """Returns all source file paths under a session directory.
 
-    Reserved metadata files (metadata.json, analysis.json) are excluded so
-    they are never treated as source code or counted as uploads.
+    Searches recursively so sessions that keep files in sub-folders (e.g.
+    GitHub repositories stored as ``<repo>/<path>/<file>``) are fully
+    discovered. Flat upload sessions behave exactly as before.
+
+    Reserved metadata files (metadata.json, analysis.json, source.json) are
+    excluded so they are never treated as source code or counted as uploads.
     """
     session_dir = UPLOAD_FOLDER / session_id
     if not session_dir.exists():
         return []
     return [
         path
-        for path in session_dir.iterdir()
+        for path in sorted(session_dir.rglob("*"))
         if path.is_file() and path.name not in RESERVED_FILES
     ]
 
@@ -158,19 +163,29 @@ def extract_zip(zip_bytes: bytes, session_id: str) -> list[str]:
 def get_session_file_path(session_id: str, filename: str) -> Path:
     """
     Safely resolves a file path inside a session folder.
-    Raises ValueError for traversal attempts or missing files.
+
+    Accepts either a flat filename (``main.py``) or a relative sub-path
+    (``project-a/main.py``) used by GitHub-sourced sessions. The resolved
+    path must stay inside the session folder, which prevents path traversal
+    and extraction-escape attempts.
+
+    Raises ValueError for traversal attempts or reserved files, and
+    FileNotFoundError if the file does not exist.
     """
-    safe_name = _safe_filename(filename)
-    if not safe_name or safe_name != filename:
+    if not filename:
         raise ValueError("Invalid filename.")
 
     session_dir = (UPLOAD_FOLDER / session_id).resolve()
-    file_path = (session_dir / safe_name).resolve()
+    file_path = (session_dir / filename).resolve()
 
+    # The resolved file must live inside the session directory.
     if session_dir not in file_path.parents:
         raise ValueError("Invalid file path.")
 
+    if file_path.name in RESERVED_FILES:
+        raise ValueError("Invalid filename.")
+
     if not file_path.exists() or not file_path.is_file():
-        raise FileNotFoundError(f"File not found: {safe_name}")
+        raise FileNotFoundError(f"File not found: {filename}")
 
     return file_path

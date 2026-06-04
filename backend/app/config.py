@@ -32,5 +32,22 @@ LINE_MATCH_SIMILARITY_THRESHOLD = 0.75
 OLLAMA_MODEL = "llama3.1"
 OLLAMA_URL = "http://localhost:11434/api/generate"
 
+# GitHub repository comparison
+GITHUB_MAX_FILES_PER_REPO = 100
+GITHUB_MAX_DOWNLOAD_SIZE = 60 * 1024 * 1024  # 60 MB per repo archive
+GITHUB_REQUEST_TIMEOUT = 30  # seconds
+GITHUB_IGNORED_DIRS = {
+    ".git",
+    "node_modules",
+    "venv",
+    ".venv",
+    "__pycache__",
+    "dist",
+    "build",
+    "target",
+    ".next",
+    "coverage",
+}
+
 # Create upload folder automatically
 UPLOAD_FOLDER.mkdir(parents=True, exist_ok=True)

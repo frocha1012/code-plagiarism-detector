@@ -54,3 +54,9 @@ class HistoryItem(BaseModel):
     file_count: int
     highest_score: float
     high_risk_pairs: int
+
+
+class GithubCompareRequest(BaseModel):
+    """Request body for comparing two public GitHub repositories."""
+    repo_url_1: str
+    repo_url_2: str

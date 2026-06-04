@@ -1402,6 +1402,92 @@ pre {
   margin-bottom: 0;
 }
 
+/* ── Analysis mode tabs ──────────────────────────────────────────────────── */
+
+.mode-tabs {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 1.5rem;
+  padding: 0.35rem;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.55);
+}
+
+.mode-tab {
+  padding: 0.6rem 1.2rem;
+  border-radius: 10px;
+  background: transparent;
+  color: #9fb2cd;
+  font-weight: 700;
+  transition:
+    color 160ms ease,
+    background 160ms ease;
+}
+
+.mode-tab:hover {
+  color: #e5eefb;
+}
+
+.mode-tab.active {
+  color: #fff;
+  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  box-shadow: 0 10px 30px rgba(37, 99, 235, 0.3);
+}
+
+/* ── GitHub repository form ──────────────────────────────────────────────── */
+
+.github-form {
+  display: grid;
+  gap: 1.1rem;
+  padding: 1.6rem;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 18px;
+  background: rgba(15, 23, 42, 0.5);
+}
+
+.field {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.field-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #bcd0ee;
+}
+
+.text-input {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 12px;
+  background: rgba(2, 6, 23, 0.55);
+  color: #e5eefb;
+  font-size: 0.95rem;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.text-input::placeholder {
+  color: #5b6b85;
+}
+
+.text-input:focus {
+  outline: none;
+  border-color: rgba(96, 165, 250, 0.7);
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.16);
+}
+
+.field-hint {
+  color: #7f8ea3;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
 @media (max-width: 780px) {
   .history-card {
     flex-direction: column;

@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import CORS_ORIGINS
 from app.routes.explain_routes import router as explain_router
 from app.routes.file_routes import router as file_router
+from app.routes.github_routes import router as github_router
 from app.routes.history_routes import router as history_router
 from app.routes.report_routes import router as report_router
 from app.routes.summary_routes import router as summary_router
@@ -32,6 +33,7 @@ app.include_router(report_router, prefix="/api")
 app.include_router(explain_router, prefix="/api")
 app.include_router(summary_router, prefix="/api")
 app.include_router(history_router, prefix="/api")
+app.include_router(github_router, prefix="/api")
 
 
 @app.get("/")

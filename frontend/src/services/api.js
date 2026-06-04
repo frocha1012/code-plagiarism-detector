@@ -85,6 +85,21 @@ export async function explainPair(sessionId, file1, file2, score, level) {
   return res.json(); // { explanation: "..." }
 }
 
+export async function compareGithubRepos(repoUrl1, repoUrl2) {
+  const res = await fetch(`${BASE_URL}/github/compare`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ repo_url_1: repoUrl1, repo_url_2: repoUrl2 }),
+  });
+
+  if (!res.ok) {
+    const error = await res.json().catch(() => null);
+    throw new Error(error?.detail || "Repository comparison failed");
+  }
+
+  return res.json(); // { session_id, pairs }
+}
+
 export async function getHistory() {
   const res = await fetch(`${BASE_URL}/history`);
 
