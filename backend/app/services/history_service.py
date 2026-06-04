@@ -84,6 +84,26 @@ def list_history() -> list[dict]:
     return history
 
 
+def get_statistics() -> dict:
+    """
+    Aggregates lightweight, read-only stats across every saved analysis.
+    Used by the About / Methodology page. Reuses the same metadata.json
+    files the History page relies on, so it adds no new storage.
+    """
+    history = list_history()
+    total_analyses = len(history)
+    total_files = sum(int(item.get("file_count", 0)) for item in history)
+    total_high_risk_pairs = sum(
+        int(item.get("high_risk_pairs", 0)) for item in history
+    )
+
+    return {
+        "total_analyses": total_analyses,
+        "total_files": total_files,
+        "total_high_risk_pairs": total_high_risk_pairs,
+    }
+
+
 def get_analysis(session_id: str) -> dict | None:
     """Returns the stored analysis ({session_id, pairs}) or None if missing."""
     analysis_path = UPLOAD_FOLDER / session_id / ANALYSIS_FILE

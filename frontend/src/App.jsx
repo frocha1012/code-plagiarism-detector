@@ -2,9 +2,10 @@ import { useState } from "react";
 import UploadPage from "./pages/UploadPage";
 import ResultsPage from "./pages/ResultsPage";
 import HistoryPage from "./pages/HistoryPage";
+import AboutPage from "./pages/AboutPage";
 
 export default function App() {
-  const [view, setView] = useState("upload"); // "upload" | "results" | "history"
+  const [view, setView] = useState("upload"); // "upload" | "results" | "history" | "about"
   const [analysisResult, setAnalysisResult] = useState(null);
 
   function showResults(result) {
@@ -30,7 +31,9 @@ export default function App() {
           <nav className="app-nav-links">
             <button
               type="button"
-              className={`nav-link ${view !== "history" ? "active" : ""}`}
+              className={`nav-link ${
+                view === "upload" || view === "results" ? "active" : ""
+              }`}
               onClick={goHome}
             >
               Home
@@ -42,6 +45,13 @@ export default function App() {
             >
               History
             </button>
+            <button
+              type="button"
+              className={`nav-link ${view === "about" ? "active" : ""}`}
+              onClick={() => setView("about")}
+            >
+              About
+            </button>
           </nav>
         </header>
 
@@ -51,6 +61,7 @@ export default function App() {
             <ResultsPage results={analysisResult} onReset={goHome} />
           )}
           {view === "history" && <HistoryPage onOpen={showResults} />}
+          {view === "about" && <AboutPage />}
         </main>
       </div>
     </div>

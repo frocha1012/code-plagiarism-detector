@@ -9,6 +9,7 @@ from app.routes.explain_routes import router as explain_router
 from app.routes.file_routes import router as file_router
 from app.routes.github_routes import router as github_router
 from app.routes.history_routes import router as history_router
+from app.routes.meta_routes import router as meta_router
 from app.routes.report_routes import router as report_router
 from app.routes.summary_routes import router as summary_router
 from app.routes.upload_routes import router as upload_router
@@ -34,6 +35,7 @@ app.include_router(explain_router, prefix="/api")
 app.include_router(summary_router, prefix="/api")
 app.include_router(history_router, prefix="/api")
 app.include_router(github_router, prefix="/api")
+app.include_router(meta_router, prefix="/api")
 
 
 @app.get("/")

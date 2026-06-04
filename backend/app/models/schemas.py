@@ -60,3 +60,23 @@ class GithubCompareRequest(BaseModel):
     """Request body for comparing two public GitHub repositories."""
     repo_url_1: str
     repo_url_2: str
+
+
+class SimilarityThresholds(BaseModel):
+    """Similarity cut-offs (0–100%) sourced from the backend config."""
+    high: float
+    medium: float
+
+
+class ProjectStatistics(BaseModel):
+    """Aggregated, read-only usage stats for the About page."""
+    total_analyses: int
+    total_files: int
+    total_high_risk_pairs: int
+    total_reports: int | None = None  # not tracked yet — optional placeholder
+
+
+class MetaResponse(BaseModel):
+    """Configuration + statistics surfaced on the About / Methodology page."""
+    thresholds: SimilarityThresholds
+    statistics: ProjectStatistics

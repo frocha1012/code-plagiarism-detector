@@ -137,6 +137,17 @@ export async function deleteHistorySession(sessionId) {
   return res.json();
 }
 
+export async function getMeta() {
+  const res = await fetch(`${BASE_URL}/meta`);
+
+  if (!res.ok) {
+    const error = await res.json().catch(() => null);
+    throw new Error(error?.detail || "Failed to load project info");
+  }
+
+  return res.json(); // { thresholds: { high, medium }, statistics: {...} }
+}
+
 export async function exportPdfReport(sessionId) {
   const encodedSessionId = encodeURIComponent(sessionId);
   const res = await fetch(`${BASE_URL}/report/${encodedSessionId}`);
