@@ -37,16 +37,19 @@ npm install
 
 This installs `@tauri-apps/cli` automatically.
 
-### 4. Generate app icons (one time only)
+### 4. App icons (already included)
 
-Tauri requires icon files in `src-tauri/icons/`. Generate them from any 1024×1024 PNG:
+The generated icons are committed in `src-tauri/icons/`, so no action is needed.
+
+To regenerate them from a different source image (any 1024×1024 PNG, or the
+included `assets/icon.jpg`):
 
 ```powershell
 cd C:\Users\froch\Desktop\P4\frontend
-npx tauri icon path/to/your-icon.png
+npx tauri icon ../assets/icon.jpg
 ```
 
-This creates all required icon sizes automatically.
+This recreates all required icon sizes automatically.
 
 ---
 
