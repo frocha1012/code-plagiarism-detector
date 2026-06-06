@@ -18,10 +18,11 @@ dist/
 frontend/src-tauri/target/
 frontend/src-tauri/gen/
 frontend/src-tauri/Cargo.lock
-frontend/src-tauri/icons/
 
 # Project assets (source images, screenshots)
-assets/
+# Ignore everything except the Tauri source icon, which is needed to
+assets/*
+!assets/icon.jpg
 
 # OS
 .DS_Store
