@@ -250,14 +250,37 @@ P4/
 
 ## Screenshots
 
-> Place images in `docs/screenshots/` and reference them here.
+### Upload page
 
-| View | Preview |
-|---|---|
-| Upload page | `![Upload](docs/screenshots/upload.png)` |
-| Results dashboard | `![Results](docs/screenshots/results.png)` |
-| Compare view | `![Compare](docs/screenshots/compare.png)` |
-| AI explanation | `![Explain](docs/screenshots/explain.png)` |
+![Upload page](docs/screenshots/inicio.png)
+
+### Analysis in progress
+
+![Analysis loader](docs/screenshots/thinking.png)
+
+### Compare view
+
+![Similar code lines](docs/screenshots/matches.png)
+
+### GitHub comparison — high risk
+
+![High-risk GitHub results](docs/screenshots/high-risk-github.png)
+
+### GitHub comparison — medium / low risk
+
+![Low-risk GitHub results](docs/screenshots/low-risk-github.png)
+
+### Analysis history
+
+![Analysis history](docs/screenshots/historico.png)
+
+### Tauri desktop app
+
+![Tauri desktop](docs/screenshots/rust-desktop.png)
+
+### API documentation (Swagger)
+
+![Swagger API docs](docs/screenshots/API-calls-swagger.png)
 
 ---
 
