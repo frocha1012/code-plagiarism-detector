@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 # Base paths
@@ -29,8 +30,10 @@ MEDIUM_SIMILARITY_THRESHOLD = 0.78
 LINE_MATCH_SIMILARITY_THRESHOLD = 0.75
 
 # Ollama (optional AI explanations)
+# OLLAMA_URL can be overridden via env so the backend (e.g. in Docker)
+# can reach an Ollama instance running on the host machine.
 OLLAMA_MODEL = "llama3.1"
-OLLAMA_URL = "http://localhost:11434/api/generate"
+OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434/api/generate")
 
 # GitHub repository comparison
 GITHUB_MAX_FILES_PER_REPO = 100
