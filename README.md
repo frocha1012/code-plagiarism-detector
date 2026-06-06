@@ -288,15 +288,6 @@ P4/
 
 ## Authors
 
-- *Name* — *role / contribution* — *contact*
-- *Name* — *role / contribution* — *contact*
+- **Fernando Rocha** — Student — [fernandorocha@ipvc.pt](mailto:fernandorocha@ipvc.pt)
 
-> Course: _______   |   Institution: _______   |   Year: 2026
-
----
-
-## License
-
-Released under the *TBD* license. See `LICENSE`.
-
-> _Placeholder — add a license file (e.g. MIT) before publishing._
+> **Course:** LEI — Projeto 4 (P4)   |   **Institution:** IPVC   |   **Year:** 2026
